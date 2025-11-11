@@ -92,3 +92,115 @@ impl Signature {
         Self::from_bytes(&bytes).map_err(|_| hex::FromHexError::InvalidStringLength)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{KeyPair, PrivateKey};
+
+    /// Test that signature verification works correctly
+    /// This ensures that the sign/verify logic is consistent
+    #[test]
+    fn signature_sign_and_verify() {
+        // Create a keypair
+        let keypair = KeyPair::new();
+        let message = b"test message for TOS signature";
+
+        // Sign the message
+        let signature = keypair.sign(message);
+
+        // Verify the signature
+        assert!(
+            signature.verify(message, keypair.get_public_key()),
+            "Signature verification should pass for valid signature"
+        );
+
+        // Verify fails with wrong message
+        let wrong_message = b"wrong message";
+        assert!(
+            !signature.verify(wrong_message, keypair.get_public_key()),
+            "Signature verification should fail for wrong message"
+        );
+
+        // Verify fails with wrong public key
+        let wrong_keypair = KeyPair::new();
+        assert!(
+            !signature.verify(message, wrong_keypair.get_public_key()),
+            "Signature verification should fail for wrong public key"
+        );
+    }
+
+    /// Test that signatures can be serialized and deserialized
+    #[test]
+    fn signature_serialization() {
+        let keypair = KeyPair::new();
+        let message = b"test serialization";
+        let signature = keypair.sign(message);
+
+        // Serialize to bytes
+        let bytes = signature.to_bytes();
+        assert_eq!(bytes.len(), SIGNATURE_SIZE);
+
+        // Deserialize from bytes
+        let deserialized = Signature::from_bytes(&bytes).expect("Should deserialize");
+        assert_eq!(signature, deserialized);
+
+        // Verify deserialized signature
+        assert!(
+            deserialized.verify(message, keypair.get_public_key()),
+            "Deserialized signature should verify"
+        );
+    }
+
+    /// Test hex encoding/decoding
+    #[test]
+    fn signature_hex_encoding() {
+        let keypair = KeyPair::new();
+        let message = b"test hex encoding";
+        let signature = keypair.sign(message);
+
+        // Encode to hex
+        let hex_str = signature.to_hex();
+        assert_eq!(hex_str.len(), SIGNATURE_SIZE * 2); // 2 hex chars per byte
+
+        // Decode from hex
+        let decoded = Signature::from_hex(&hex_str).expect("Should decode from hex");
+        assert_eq!(signature, decoded);
+
+        // Verify decoded signature
+        assert!(
+            decoded.verify(message, keypair.get_public_key()),
+            "Decoded signature should verify"
+        );
+    }
+
+    /// Test that signature verification uses the correct H generator
+    #[test]
+    fn signature_uses_correct_h_generator() {
+        use crate::proofs::H;
+
+        // Create a known private key (for testing purposes)
+        let private_key = PrivateKey::from_scalar(Scalar::from(42u64));
+
+        // Compute public key manually: P = H * private_key
+        let public_key_point = (*H) * private_key.as_scalar();
+
+        // Create keypair from this private key
+        let keypair = KeyPair::from_private_key(private_key).expect("Should create keypair");
+
+        // Verify that the keypair's public key matches our manual calculation
+        assert_eq!(
+            keypair.get_public_key().as_point(),
+            &public_key_point,
+            "KeyPair should use H generator for public key derivation"
+        );
+
+        // Sign and verify to ensure H is used consistently
+        let message = b"test H generator usage";
+        let signature = keypair.sign(message);
+        assert!(
+            signature.verify(message, keypair.get_public_key()),
+            "Signature should verify using same H generator"
+        );
+    }
+}

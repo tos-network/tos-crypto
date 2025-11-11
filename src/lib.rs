@@ -21,3 +21,37 @@ pub use elgamal::{
 
 // Re-export curve25519_dalek types for convenience
 pub use curve25519_dalek::{ristretto::CompressedRistretto, RistrettoPoint, Scalar};
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use sha3::Sha3_512;
+
+    /// Test that H generator is backward compatible with legacy definition.
+    /// This ensures that signatures created before and after the tos-crypto
+    /// extraction remain valid and identical.
+    #[test]
+    fn h_generator_backward_compatibility() {
+        // Legacy definition (pre-split): hardcoded seed "TOS_SIGNATURE_GENERATOR_H"
+        let legacy_h = RistrettoPoint::hash_from_bytes::<Sha3_512>(b"TOS_SIGNATURE_GENERATOR_H");
+
+        // New definition (from tos-crypto)
+        let current_h = *H;
+
+        assert_eq!(
+            legacy_h, current_h,
+            "H generator must match legacy definition for signature compatibility"
+        );
+    }
+
+    /// Test that G generator is the standard Ristretto basepoint
+    #[test]
+    fn g_generator_is_ristretto_basepoint() {
+        use curve25519_dalek::constants::RISTRETTO_BASEPOINT_POINT;
+
+        assert_eq!(
+            G, RISTRETTO_BASEPOINT_POINT,
+            "G generator must be the Ristretto basepoint"
+        );
+    }
+}

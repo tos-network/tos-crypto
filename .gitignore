@@ -1,0 +1,56 @@
+# Rust build artifacts
+/target/
+**/target/
+
+# Cargo lock file (uncomment if this is a library)
+# Cargo.lock
+
+# Debug symbols
+**/*.pdb
+
+# IDE / Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Rust-specific
+**/*.rs.bk
+*.orig
+
+# Documentation build
+/doc/
+
+# Test coverage
+*.profraw
+*.profdata
+lcov.info
+coverage/
+
+# Benchmark results
+/benches/results/
+
+# Temporary files
+*.tmp
+.env
+.env.local
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Linux
+*~
+.directory
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Logs
+*.log
+logs/

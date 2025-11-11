@@ -1,0 +1,43 @@
+[package]
+name = "tos-crypto"
+version = "0.1.0"
+edition = "2021"
+authors = ["TOS Network Team <info@tos.network>"]
+license = "BSD-3-Clause"
+description = "TOS Network cryptographic primitives"
+repository = "https://github.com/tos-network/tos-crypto"
+homepage = "https://tos.network"
+
+[dependencies]
+# Curve25519 for Schnorr and Ed25519
+curve25519-dalek = { features = ["digest", "group", "rand_core", "serde"], git = "https://github.com/tos-network/curve25519-dalek", tag = "v4.2.0" }
+
+# Hashing
+sha3 = "0.10.8"
+blake3 = "1.5.1"
+
+# Memory safety
+zeroize = { version = "1.7.0", features = ["derive"] }
+
+# Subtle constant-time operations
+subtle = "2.5"
+
+# Error handling
+thiserror = "2.0"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+
+# Random number generation (for key generation)
+rand = "0.8"
+
+# Hex encoding/decoding
+hex = "0.4"
+
+# Lazy static for generator points
+lazy_static = "1.4"
+
+[dev-dependencies]
+
+[lib]
+crate-type = ["cdylib", "rlib"]

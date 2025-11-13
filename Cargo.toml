@@ -10,7 +10,8 @@ homepage = "https://tos.network"
 
 [dependencies]
 # Curve25519 for Schnorr and Ed25519
-curve25519-dalek = { features = ["digest", "group", "rand_core", "serde"], git = "https://github.com/tos-network/curve25519-dalek", tag = "v4.2.0" }
+# Pinned to specific commit for 100% reproducible builds (tag v4.2.0 = 0ca0e1a1...)
+curve25519-dalek = { features = ["digest", "group", "rand_core", "serde"], git = "https://github.com/tos-network/curve25519-dalek", rev = "0ca0e1a1cab7c08733e35cfedc33fc68db2058be" }
 
 # Hashing
 sha3 = "0.10.8"
